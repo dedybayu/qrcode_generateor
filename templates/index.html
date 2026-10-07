@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBS QR Studio | Premium Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-hover: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            overflow-x: hidden;
+        }
+
+        /* Background Effects */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            animation: pulse 8s alternate infinite;
+        }
+        .orb-1 { width: 500px; height: 500px; background: rgba(139, 92, 246, 0.25); top: -100px; left: -100px; }
+        .orb-2 { width: 600px; height: 600px; background: rgba(56, 189, 248, 0.2); bottom: -150px; right: -100px; animation-delay: -4s; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 48px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6);
+            display: flex;
+            gap: 48px;
+            align-items: stretch;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                padding: 32px;
+                gap: 32px;
+            }
+        }
+
+        /* Layout Panels */
+        .left-panel {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .right-panel {
+            width: 380px;
+            flex-shrink: 0;
+            display: flex;
+        }
+        
+        @media (max-width: 900px) {
+            .right-panel {
+                width: 100%;
+            }
+        }
+
+        h1 { 
+            font-size: 36px; 
+            margin-bottom: 12px; 
+            background: linear-gradient(to right, #a78bfa, #38bdf8); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            letter-spacing: -0.5px;
+        }
+        .subtitle { 
+            color: var(--text-muted); 
+            margin-bottom: 40px; 
+            font-size: 16px; 
+            line-height: 1.5;
+        }
+
+        /* Grid Options */
+        .grid-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 600px) {
+            .grid-options { grid-template-columns: 1fr; }
+        }
+
+        .option-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover { background: var(--card-hover); transform: translateY(-3px); }
+        .option-card.active { background: rgba(139, 92, 246, 0.15); border-color: var(--primary); box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15); }
+        
+        .option-icon {
+            width: 48px; height: 48px; background: rgba(255, 255, 255, 0.05); border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; color: #a78bfa; flex-shrink: 0; transition: all 0.3s;
+        }
+        .option-card.active .option-icon { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(139,92,246,0.3); }
+        .option-text h3 { font-size: 16px; margin-bottom: 6px; font-weight: 600; }
+        .option-text p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+
+        /* Forms Area */
+        .forms-container {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 36px;
+        }
+        .form-section { display: none; animation: slideIn 0.4s ease; }
+        .form-section.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Inputs */
+        .input-group { margin-bottom: 24px; }
+        .input-group label { display: block; margin-bottom: 10px; font-size: 15px; font-weight: 500; color: var(--text-muted); }
+        input, textarea, select {
+            width: 100%; padding: 16px 20px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border);
+            border-radius: 14px; color: white; font-size: 16px; outline: none; transition: all 0.3s;
+        }
+        select { appearance: none; cursor: pointer; }
+        select option { background: #1e293b; color: white; }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.3); }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2); background: rgba(0, 0, 0, 0.5); }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+        @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+
+        /* Button */
+        button.btn-main {
+            width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            border: none; border-radius: 14px; color: white; font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3); display: flex; justify-content: center; align-items: center; margin-top: 32px;
+        }
+        button.btn-main:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(139, 92, 246, 0.5); }
+        button.btn-main:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Right Panel - Preview Box */
+        .qr-preview-box {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px dashed rgba(255,255,255,0.15);
+            border-radius: 24px;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: all 0.4s ease;
+        }
+        
+        .qr-preview-box.has-result {
+            border-style: solid;
+            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(139, 92, 246, 0.05);
+            box-shadow: inset 0 0 40px rgba(139, 92, 246, 0.1);
+        }
+
+        .placeholder-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.5;
+        }
+
+        .result-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .result-state.show {
+            display: flex;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .qr-wrapper {
+            background: white;
+            padding: 24px;
+            border-radius: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .qr-wrapper img {
+            display: block;
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .btn-download {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 14px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .btn-download:hover { 
+            background: rgba(255,255,255,0.15); 
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .loader { display: none; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.2); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .icon-svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    
+    <div class="container">
+        
+        <!-- Left: Forms & Options -->
+        <div class="left-panel">
+            <h1>DBS QR Studio</h1>
+            <p class="subtitle">Choose a QR Code type and fill in the details below.</p>
+            
+            <div class="grid-options" id="optionsContainer">
+                <!-- Cards render by JS -->
+            </div>
+
+            <div class="forms-container">
+                <form id="qrForm">
+                    
+                    <div id="form-url" class="form-section active">
+                        <div class="input-group">
+                            <label>Enter Website URL</label>
+                            <input type="url" id="val-url" placeholder="https://example.com" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div id="form-text" class="form-section">
+                        <div class="input-group">
+                            <label>Enter Your Text</label>
+                            <textarea id="val-text" rows="5" placeholder="Type your message or information here..."></textarea>
+                        </div>
+                    </div>
+
+                    <div id="form-wifi" class="form-section">
+                        <div class="input-group">
+                            <label>Network Name (SSID)</label>
+                            <input type="text" id="val-wifi-ssid" placeholder="Example: HomeNetwork">
+                        </div>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Password</label>
+                                <input type="text" id="val-wifi-pass" placeholder="Wi-Fi Password">
+                            </div>
+                            <div class="input-group">
+                                <label>Security Type</label>
+                                <select id="val-wifi-type">
+                                    <option value="WPA">WPA/WPA2</option>
+                                    <option value="WEP">WEP</option>
+                                    <option value="nopass">No Password</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="form-vcard" class="form-section">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>First Name</label>
+                                <input type="text" id="val-vcard-fn" placeholder="John">
+                            </div>
+                            <div class="input-group">
+                                <label>Last Name</label>
+                                <input type="text" id="val-vcard-ln" placeholder="Doe">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="val-vcard-tel" placeholder="+1 234 567 8900">
+                        </div>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="val-vcard-email" placeholder="john.doe@example.com">
+                        </div>
+                    </div>
+                    
+                    <div id="form-email" class="form-section">
+                        <div class="input-group">
+                            <label>Recipient Email</label>
+                            <input type="email" id="val-email-to" placeholder="recipient@example.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Subject</label>
+                            <input type="text" id="val-email-sub" placeholder="Email Subject">
+                        </div>
+                        <div class="input-group">
+                            <label>Message</label>
+                            <textarea id="val-email-body" rows="3" placeholder="Email body message..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div id="form-social" class="form-section">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Choose Platform</label>
+                                <select id="val-social-platform">
+                                    <option value="instagram">Instagram</option>
+                                    <option value="tiktok">TikTok</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="x">X (Twitter)</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Username / ID</label>
+                                <input type="text" id="val-social-username" placeholder="Example: @username">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <label>Image Resolution</label>
+                        <select id="val-resolution">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                            <option value="extra_large">Extra Large (10000x10000)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="generateBtn" class="btn-main">
+                        <div id="btnContent" style="display: flex; align-items: center; gap: 10px;">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Generate QR Code
+                        </div>
+                        <div class="loader" id="loader"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Preview Box -->
+        <div class="right-panel">
+            <div class="qr-preview-box" id="qrPreviewBox">
+                <!-- Placeholder state -->
+                <div id="placeholderState" class="placeholder-state">
+                    <svg class="icon-svg" viewBox="0 0 24 24" style="width:72px;height:72px; opacity:0.3; margin-bottom: 24px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <p style="color: var(--text-muted); text-align: center; font-size: 15px; line-height: 1.6;">Your QR Code will<br>appear here</p>
+                </div>
+                
+                <!-- Result state -->
+                <div id="resultState" class="result-state">
+                    <div class="qr-wrapper">
+                        <img id="qrImage" src="" alt="Generated QR Code">
+                    </div>
+                    <button class="btn-download" id="downloadBtn" type="button">
+                        <svg class="icon-svg" style="width:20px;height:20px;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Download Image
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Options Data
+        const options = [
+            { id: 'url', title: 'Website URL', desc: 'Link to any website', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>' },
+            { id: 'text', title: 'Text', desc: 'Display a text message', icon: '<path d="M4 7V4h16v3"></path><path d="M9 20h6"></path><path d="M12 4v16"></path>' },
+            { id: 'wifi', title: 'Wi-Fi', desc: 'Network connection', icon: '<path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line>' },
+            { id: 'vcard', title: 'vCard', desc: 'Digital contact card', icon: '<rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><path d="M7 15h0M2 9.5h20"></path>' },
+            { id: 'email', title: 'Email', desc: 'Send an instant email', icon: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>' },
+            { id: 'social', title: 'Social Media', desc: 'Link to a social profile', icon: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>' }
+        ];
+
+        let currentType = 'url';
+        const container = document.getElementById('optionsContainer');
+        
+        // State UI Elements
+        const placeholderState = document.getElementById('placeholderState');
+        const resultState = document.getElementById('resultState');
+        const qrPreviewBox = document.getElementById('qrPreviewBox');
+
+        // Render Cards
+        options.forEach(opt => {
+            const card = document.createElement('div');
+            card.className = `option-card ${opt.id === currentType ? 'active' : ''}`;
+            card.dataset.type = opt.id;
+            card.innerHTML = `
+                <div class="option-icon"><svg class="icon-svg" viewBox="0 0 24 24">${opt.icon}</svg></div>
+                <div class="option-text"><h3>${opt.title}</h3><p>${opt.desc}</p></div>
+            `;
+            container.appendChild(card);
+            
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.option-card').forEach(c => c.classList.remove('active'));
+                document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+                
+                card.classList.add('active');
+                currentType = opt.id;
+                document.getElementById(`form-${opt.id}`).classList.add('active');
+            });
+        });
+
+        // Form Submission
+        document.getElementById('qrForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let payloadData = '';
+            
+            try {
+                if (currentType === 'url') {
+                    payloadData = document.getElementById('val-url').value;
+                    if(!payloadData) throw new Error("URL cannot be empty");
+                } 
+                else if (currentType === 'text') {
+                    payloadData = document.getElementById('val-text').value;
+                    if(!payloadData) throw new Error("Text cannot be empty");
+                } 
+                else if (currentType === 'wifi') {
+                    const ssid = document.getElementById('val-wifi-ssid').value;
+                    const pass = document.getElementById('val-wifi-pass').value;
+                    const type = document.getElementById('val-wifi-type').value;
+                    if(!ssid) throw new Error("SSID cannot be empty");
+                    payloadData = `WIFI:T:${type};S:${ssid};P:${pass};;`;
+                } 
+                else if (currentType === 'vcard') {
+                    const fn = document.getElementById('val-vcard-fn').value;
+                    const ln = document.getElementById('val-vcard-ln').value;
+                    const tel = document.getElementById('val-vcard-tel').value;
+                    const email = document.getElementById('val-vcard-email').value;
+                    if(!fn) throw new Error("First name cannot be empty");
+                    payloadData = `BEGIN:VCARD\\nVERSION:3.0\\nN:${ln};${fn}\\nFN:${fn} ${ln}\\nTEL:${tel}\\nEMAIL:${email}\\nEND:VCARD`;
+                }
+                else if (currentType === 'email') {
+                    const to = document.getElementById('val-email-to').value;
+                    const sub = document.getElementById('val-email-sub').value;
+                    const body = document.getElementById('val-email-body').value;
+                    if(!to) throw new Error("Recipient email cannot be empty");
+                    payloadData = `MATMSG:TO:${to};SUB:${sub};BODY:${body};;`;
+                }
+                else if (currentType === 'social') {
+                    const platform = document.getElementById('val-social-platform').value;
+                    let username = document.getElementById('val-social-username').value.trim();
+                    if(!username) throw new Error("Username cannot be empty");
+                    
+                    username = username.replace(/^@/, ''); // Remove @ if present
+                    
+                    const urls = {
+                        'instagram': `https://instagram.com/${username}`,
+                        'tiktok': `https://tiktok.com/@${username}`,
+                        'youtube': `https://youtube.com/@${username}`,
+                        'linkedin': `https://linkedin.com/in/${username}`,
+                        'facebook': `https://facebook.com/${username}`,
+                        'x': `https://x.com/${username}`
+                    };
+                    payloadData = urls[platform];
+                }
+
+                // Get Resolution
+                const resolution = document.getElementById('val-resolution').value;
+
+                // Loading State
+                const btnContent = document.getElementById('btnContent');
+                const loader = document.getElementById('loader');
+                const generateBtn = document.getElementById('generateBtn');
+                
+                btnContent.style.display = 'none';
+                loader.style.display = 'block';
+                generateBtn.disabled = true;
+                
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        data: payloadData,
+                        resolution: resolution
+                    })
+                });
+                
+                const responseData = await response.json();
+                if (response.ok) {
+                    window.currentQrUrl = responseData.image;
+                    document.getElementById('qrImage').src = responseData.image;
+                    
+                    // Show Result Box
+                    placeholderState.style.display = 'none';
+                    resultState.classList.add('show');
+                    qrPreviewBox.classList.add('has-result');
+                } else {
+                    alert(responseData.error || 'Failed to generate QR code');
+                }
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                document.getElementById('btnContent').style.display = 'flex';
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+            }
+        });
+
+        // Download Action
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (window.currentQrUrl) {
+                const a = document.createElement('a');
+                a.href = window.currentQrUrl;
+                a.download = `qrcode_${currentType}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        });
+    </script>
+</body>
+</html>
